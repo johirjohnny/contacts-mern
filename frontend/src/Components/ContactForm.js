@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import FileBase from 'react-file-base64';
 import {
     DialogActions,
@@ -9,8 +10,10 @@ import {
     Dialog,
     Button,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 
+import { makeStyles } from '@material-ui/core/styles';
+import { createContact } from '../actions/contactAction';
+//import { createContact, updateContact } from '../actions/contactActions';
 
 const useStyles = makeStyles((theme) => ({
     file: {
@@ -18,9 +21,41 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-  
-  
-const ContactForm = ({open, handleClose}) => {
+const ContactForm = ({ currentId, setCurrentId, open, handleClose }) => {
+    const dispatch = useDispatch();
+    const classes = useStyles();
+
+    const initialState = {
+        name: '',
+        email: '',
+        phoneNo1: '',
+        phoneNo2: '',
+        address: '',
+        selectedImage: '',
+    };
+
+    const [contactData, setContactData] = useState(initialState);
+
+    // const contactDetails = useSelector((state) =>
+    //     currentId ? state.contacts.find((c) => c._id === currentId) : null
+    // );
+
+    // useEffect(() => {
+    //     if (contactDetails) setContactData(contactDetails);
+    // }, [contactDetails]);
+
+    const clearData = () => {
+        setContactData(initialState);
+        setCurrentId(0);
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        handleClose();
+        dispatch(createContact(contactData));
+        //else dispatch(updateContact(currentId, contactData));
+        clearData();
+    };
+
     return (
         <Dialog
             open={open}
@@ -30,17 +65,21 @@ const ContactForm = ({open, handleClose}) => {
             <DialogTitle id='form-dialog-title'>Contact Details</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    
+                    {/* {`To ${currentId === 0 ? 'add' : 'update'
+                        } your contact details from here`} */}
                 </DialogContentText>
 
                 <TextField
                     autoFocus
                     margin='dense'
                     id='name'
-                    label='Your Name'
+                    label='Good Name'
                     type='text'
                     fullWidth
-                    value=''
+                    value={contactData.name}
+                    onChange={(e) =>
+                        setContactData({ ...contactData, name: e.target.value })
+                    }
                 />
                 <TextField
                     autoFocus
@@ -49,8 +88,10 @@ const ContactForm = ({open, handleClose}) => {
                     label='Email Address'
                     type='email'
                     fullWidth
-                    value=''
-                  
+                    value={contactData.email}
+                    onChange={(e) =>
+                        setContactData({ ...contactData, email: e.target.value })
+                    }
                 />
                 <TextField
                     autoFocus
@@ -59,8 +100,10 @@ const ContactForm = ({open, handleClose}) => {
                     label='Phone Number'
                     type='number'
                     fullWidth
-                    value=''
-                    
+                    value={contactData.phoneNo1}
+                    onChange={(e) =>
+                        setContactData({ ...contactData, phoneNo1: e.target.value })
+                    }
                 />
                 <TextField
                     autoFocus
@@ -69,8 +112,10 @@ const ContactForm = ({open, handleClose}) => {
                     label='Alternative Phone Number'
                     type='number'
                     fullWidth
-                    value=''
-                    
+                    value={contactData.phoneNo2}
+                    onChange={(e) =>
+                        setContactData({ ...contactData, phoneNo2: e.target.value })
+                    }
                 />
                 <TextField
                     autoFocus
@@ -79,23 +124,27 @@ const ContactForm = ({open, handleClose}) => {
                     label='Your Address'
                     type='text'
                     fullWidth
-                    value=''
-                    
+                    value={contactData.address}
+                    onChange={(e) =>
+                        setContactData({ ...contactData, address: e.target.value })
+                    }
                 />
-                <div >
+                <div className={classes.file}>
                     <FileBase
                         type='file'
                         multiple={false}
-                        
+                        onDone={({ base64 }) =>
+                            setContactData({ ...contactData, selectedImage: base64 })
+                        }
                     />
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button color='secondary' onClick ={handleClose}>
+                <Button color='secondary' onClick={handleClose}>
                     Close
         </Button>
-                <Button color='primary' >submit
-                   
+                <Button color='primary' onClick={handleSubmit}>
+
                 </Button>
             </DialogActions>
         </Dialog>
